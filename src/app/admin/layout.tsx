@@ -9,6 +9,7 @@ import {
   LogOut, Menu, X, Shield, ChevronRight
 } from 'lucide-react'
 import { Logo } from '@/components/shared/Logo'
+import { AdminLogin } from '@/components/admin/AdminLogin'
 
 const navItems = [
   { href: '/admin', icon: LayoutDashboard, label: 'Overview' },
@@ -27,31 +28,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const supabase = createClient()
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        router.push('/login')
-        return
-      }
-
-      // Strict admin check — only authorized emails
-      const authorizedEmails = ['user-admin@birdiefund.com']
-      if (!authorizedEmails.includes(session.user.email || '')) {
-        router.push('/')
-        return
-      }
-
+  const checkAuth = async () => {
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    // Strict admin check — only authorized emails
+    const authorizedEmails = ['admin@birdiefund.com']
+    
+    if (session && authorizedEmails.includes(session.user.email || '')) {
       setIsAuthorized(true)
-      setLoading(false)
+    } else {
+      setIsAuthorized(false)
     }
+    
+    setLoading(false)
+  }
+
+  useEffect(() => {
     checkAuth()
   }, [router, supabase])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
-    router.push('/')
+    setIsAuthorized(false)
+    router.push('/admin')
     router.refresh()
   }
 
@@ -63,7 +62,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     )
   }
 
-  if (!isAuthorized) return null
+  // Render dedicated Admin Login if not authorized
+  if (!isAuthorized) {
+    return <AdminLogin onSuccess={checkAuth} />
+  }
 
   return (
     <div className="min-h-screen bg-surface-low flex">
