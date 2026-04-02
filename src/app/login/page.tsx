@@ -21,7 +21,10 @@ export default function LoginPage() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) router.replace('/dashboard')
+      if (session) {
+        const redirectPath = session.user.email === 'admin@birdiefund.com' ? '/admin' : '/dashboard'
+        router.replace(redirectPath)
+      }
     })
   }, [router, supabase])
 
@@ -30,13 +33,14 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const { error: signInError, data } = await supabase.auth.signInWithPassword({ email, password })
     
     if (signInError) {
       setError(signInError.message)
       setLoading(false)
     } else {
-      router.push('/dashboard')
+      const redirectPath = data.user?.email === 'admin@birdiefund.com' ? '/admin' : '/dashboard'
+      router.push(redirectPath)
       router.refresh()
     }
   }

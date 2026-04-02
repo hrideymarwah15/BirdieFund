@@ -8,9 +8,10 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`)
+    const { data: { session }, error } = await supabase.auth.exchangeCodeForSession(code)
+    if (!error && session) {
+      const redirectPath = session.user.email === 'admin@birdiefund.com' ? '/admin' : next
+      return NextResponse.redirect(`${origin}${redirectPath}`)
     }
   }
 
