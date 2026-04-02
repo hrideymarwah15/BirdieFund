@@ -23,13 +23,6 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
     setError('')
     setLoading(true)
 
-    // Strict email check
-    if (email !== 'admin@birdiefund.com') {
-      setError('Access restricted to master administrative account.')
-      setLoading(false)
-      return
-    }
-
     const { error: loginError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (loginError) {
@@ -108,9 +101,10 @@ export function AdminLogin({ onSuccess }: AdminLoginProps) {
                 <input
                   type="email"
                   value={email}
-                  disabled
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 pl-12 text-white placeholder:text-white/10 focus:outline-none focus:border-green-light focus:bg-white/10 transition-all opacity-70 cursor-not-allowed"
-                  placeholder="admin@birdiefund.com"
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl h-14 pl-12 text-white placeholder:text-white/20 focus:outline-none focus:border-green-light focus:bg-white/10 transition-all font-medium"
+                  placeholder="Administrator Email"
+                  required
                 />
               </div>
             </div>
